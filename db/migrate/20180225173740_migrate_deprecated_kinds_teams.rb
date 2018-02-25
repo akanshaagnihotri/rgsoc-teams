@@ -1,8 +1,4 @@
 class MigrateDeprecatedKindsTeams < ActiveRecord::Migration[5.1]
-  class Team < ApplicationRecord
-    self.table_name = 'teams'
-  end
-
   def up
     migrate_sponsored_teams_to_full_time
     migrate_voluntary_teams_to_part_time
@@ -16,18 +12,34 @@ class MigrateDeprecatedKindsTeams < ActiveRecord::Migration[5.1]
   private
 
   def migrate_sponsored_teams_to_full_time
-    Team.where(kind: 'sponsored').update_all(kind: 'full_time')
+    execute <<-SQL
+      UPDATE teams
+      SET kind = 'full_time'
+      WHERE kind = 'sponsored'
+    SQL
   end
 
   def migrate_voluntary_teams_to_part_time
-    Team.where(kind: 'voluntary').update_all(kind: 'part_time')
+    execute <<-SQL
+      UPDATE teams
+      SET kind = 'part_time'
+      WHERE kind = 'voluntary'
+    SQL
   end
 
   def migrate_full_time_teams_to_sponsored
-    Team.where(kind: 'full_time').update_all(kind: 'sponsored')
+    execute <<-SQL
+      UPDATE teams
+      SET kind = 'sponsored'
+      WHERE kind = 'full_time'
+    SQL
   end
 
   def migrate_part_time_teams_to_voluntary
-    Team.where(kind: 'part_time').update_all(kind: 'voluntary')
+    execute <<-SQL
+      UPDATE teams
+      SET kind = 'voluntary'
+      WHERE kind = 'part_time'
+    SQL
   end
 end
